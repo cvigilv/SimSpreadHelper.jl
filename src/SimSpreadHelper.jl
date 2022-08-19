@@ -1,8 +1,8 @@
 module SimSpreadHelper
 
-include("src/utils.jl")
-include("src/graphs.jl")
-include("src/simspread.jl")
+include("utils.jl")
+include("graphs.jl")
+include("simspread.jl")
 
 export writedlm,
     read_namedmatrix,
