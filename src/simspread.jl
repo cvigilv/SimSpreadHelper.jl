@@ -370,7 +370,7 @@ function clean!(R::NamedArray, A::NamedArray, DT::NamedArray)
             R[tᵢ,:] .= -99
         end
     end
-    @warn "$disconnected targets got disconnected, flagging predictions with '-99'"
+    # @warn "$disconnected targets got disconnected, flagging predictions with '-99'"
 end
 
 """
