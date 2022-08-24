@@ -71,11 +71,6 @@ function prepare!(DT::T, DF::T, Cs::AbstractVector) where {T<:NamedMatrix}
         setnames!(DF, Fs, 2)
     end
 
-    println(Fs[begin:5])
-    println(Ds)
-    println(Ts[begin:5])
-    println(Cs)
-
     # Get dimensions of network
     Nc = length(Cs)
     Nf = length(Fs)
