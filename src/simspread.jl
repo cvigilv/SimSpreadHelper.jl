@@ -404,31 +404,27 @@ function save(filepath::String, R::NamedMatrix, DT::NamedMatrix)
 end
 
 """
-    save(filepath::String, fold::Int64, R::NamedMatrix, DT::NamedMatrix)
+    save(filepath::String, fidx::Int64, C::AbstractVector, R::NamedMatrix, DT::NamedMatrix)
 
-Store predictions as a table in the given file path.
+Store cross-valudation predictions as a table in the given file path.
 
 # Arguments
-- `filepath::String`: Output file path
-- `fold::Int64`: Fold ID
-- `R::NamedArray`: Drug-target predictions matrix
-- `DT::NamedMatrix`: Drug-target interactions adjacency matrix
+- `filepath::String` : Output file path
+- `fidx::Int64` : Numeric fold ID
+- `C::AbstractVector` : Test set compounds / ligands
+- `R::NamedMatrix` : Predicted drug-targetinteraction adjacency  matrix
+- `DT::NamedMatrix` : Ground-truth drug-target interactions adjacency matrix
 
 # Extended help
 Table format is:
 ```
-fold, compound ID, target ID, score, TP
+Fold ID, Compound ID, Target ID, SimSpread Score, True-Positive state
 ```
 """
-function save(filepath::String, fold::Int64, R::NamedMatrix, DT::NamedMatrix)
-    # Get name arrays
-    Cnames = names(DT, 1)
-    Tnames = names(DT, 2)
-
-    # Save file
-    open(filepath, "a+") do f
-        for Cᵢ in Cnames, Tᵢ in Tnames
-            write(f, "$fold, $Cᵢ, $Tᵢ, $(R[Cᵢ,Tᵢ]), $(DT[Cᵢ,Tᵢ])\n")
+function save(filepath::String, fidx::Int64, C::AbstractVector, R::NamedMatrix, DT::NamedMatrix)
+    open(filepath, "a+") do io
+        for c in C, t in names(DT, 2)
+            write(io, "$fidx, $c, $t, $(R[c,t]), $(DT[c,t])")
         end
     end
 end
