@@ -356,18 +356,20 @@ function predict(I::Tuple{T,T}, DT::NamedMatrix; GPU::Bool = false) where {T<:Na
 end
 
 """
-    clean!(R::NamedArray, A::NamedArray)
+    clean!(R::NamedArray, A::NamedArray, DT::NamedArray)
 
 Flag errors from cross-validation splitting in place.
 
 # Arguments
-- `R::NamedArray`: Drug-Target predictions matrix
+- `R::NamedArray`: Predicted drug-target interactions adjacency matrix
 - `A::NamedArray`: *de novo* NBI initial resources adjacency matrix
+- `DT::NamedArray`: Ground-truth drug-target interactions adjacency matrix
 """
-function clean!(R::T, A::T) where {T<:NamedArray}
+function clean!(R::T, A::T, DT::T) where {T<:NamedArray}
     # Clean predictions adjacancy matrix R from disconnected targets
-    for (tᵢ, k) in zip(names(A,1), k(A))
+    for (tᵢ, k) in zip(names(DT,2), k(A[names(DT,1), names(DT,2)]))
         if k == 0
+            @warn "Target \"$(tᵢ)\" got disconnected, flagging predictions"
             R[:,tᵢ] .= -99
             R[tᵢ,:] .= -99
         end
