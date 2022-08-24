@@ -423,7 +423,7 @@ Fold ID, Compound ID, Target ID, SimSpread Score, True-Positive state
 function save(filepath::String, fidx::Int64, C::AbstractVector, R::NamedMatrix, DT::NamedMatrix)
     open(filepath, "a+") do io
         for c in C, t in names(DT, 2)
-            write(io, "$fidx, $c, $t, $(R[c,t]), $(DT[c,t])")
+            write(io, "$fidx, $c, $t, $(R[c,t]), $(DT[c,t])\n")
         end
     end
 end
