@@ -270,7 +270,7 @@ function pfeaturize(M::NamedArray, α::Float64, β::Float64, weighted::Bool)
     # Filter matrix
     Mf = copy(M)
     Mf.array = pcutoff.(M.array, α, β, weighted)
-    setnames!(Mf, ["f$f" for f in names(Mf, 2)])
+    setnames!(Mf, ["f$f" for f in names(Mf, 2)], 2)
     return Mf
 end
 
@@ -296,7 +296,7 @@ function zfeaturize(M::NamedArray, zα::Float64, zβ::Float64, weighted::Bool)
     # Filter matrix
     Mf = copy(M)
     Mf.array = cutoff.(M.array, α, β, weighted)
-    setnames!(Mf, ["f$f" for f in names(Mf, 2)])
+    setnames!(Mf, ["f$f" for f in names(Mf, 2)], 2)
     return Mf
 end
 
@@ -365,15 +365,17 @@ Flag errors from cross-validation splitting in place.
 - `A::NamedArray`: *de novo* NBI initial resources adjacency matrix
 - `DT::NamedArray`: Ground-truth drug-target interactions adjacency matrix
 """
-function clean!(R::T, A::T, DT::T) where {T<:NamedArray}
+function clean!(R::NamedArray, A::NamedArray, DT::NamedArray)
     # Clean predictions adjacancy matrix R from disconnected targets
+    disconnected = 0
     for (tᵢ, k) in zip(names(DT,2), k(A[names(DT,1), names(DT,2)]))
         if k == 0
-            @warn "Target \"$(tᵢ)\" got disconnected, flagging predictions"
+            disconnected += 1
             R[:,tᵢ] .= -99
             R[tᵢ,:] .= -99
         end
     end
+    @warn "$disconnected targets got disconnected, flagging predictions with '-99'"
 end
 
 """
