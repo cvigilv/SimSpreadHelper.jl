@@ -315,11 +315,21 @@ function predict(A::T, B::T, names::Tuple; GPU::Bool = false) where {T<:NamedMat
     W = denovoNBI(B.array)
     F = begin
         F = copy(A)
-        F.array = _useGPU(A.array) * _useGPU(W)^2
+       
+        Aarr = _useGPU(A.array)
+        Warr = _useGPU(W)
+        F.array = Aarr * Warr^2
+        
+        # Free GPU memory
+        if GPU
+            CUDA.unsafe_free!(Aarr)
+            CUDA.unsafe_free!(Warr)
+        end
         return F
     end
 
     R = F[Symbol.(names[1]), Symbol.(names[2])]
+
     return R
 end
 
@@ -342,7 +352,17 @@ function predict(I::Tuple{T,T}, DT::NamedMatrix; GPU::Bool = false) where {T<:Na
     W = denovoNBI(B.array)
     F = begin
         F = copy(A)
-        F.array = _useGPU(A.array) * _useGPU(W)^2
+
+        Aarr = _useGPU(A.array)
+        Warr = _useGPU(W)
+        F.array = Aarr * Warr^2
+
+        # Free GPU memory
+        if GPU
+            CUDA.unsafe_free!(Aarr)
+            CUDA.unsafe_free!(Warr)
+        end
+
         return F
     end
 
