@@ -6,7 +6,7 @@ using NamedArrays
 using NetworkBasedInference
 
 """
-    cutoff(x::T, α::T, β::T, weighted::Bool=false) where {T<:Float64}
+    cutoff(x::T, α::T, β::T, weighted::Bool=false) where {T<:AbstractFloat}
 
 wl-SimSpread similarity cutoff function
 
@@ -16,7 +16,7 @@ wl-SimSpread similarity cutoff function
 - `β::T` : Weak-ties threshold
 - `weighted::Bool` : Apply weighting function to outcome (default = False)
 """
-function cutoff(x::T, α::T, β::T, weighted::Bool=false) where {T<:Float64}
+function cutoff(x::T, α::T, β::T, weighted::Bool=false) where {T<:AbstractFloat}
     @assert α ≥ β "β can't be greater than α!"
     if x == 0
         return 0
@@ -26,7 +26,7 @@ function cutoff(x::T, α::T, β::T, weighted::Bool=false) where {T<:Float64}
 end
 
 """
-    pcutoff(x::T, α::T, β::T, weighted::Bool=false) where {T<:Float64}
+    pcutoff(x::T, α::T, β::T, weighted::Bool=false) where {T<:AbstractFloat}
 
 wl-SimSpread similarity probabilistic cutoff function
 
@@ -36,7 +36,7 @@ wl-SimSpread similarity probabilistic cutoff function
 - `β::T` : Weak-ties probability
 - `weighted::Bool` : Apply weighting function to outcome (default = False)
 """
-function pcutoff(x::T, α::T, β::T, weighted::Bool=false) where {T<:Float64}
+function pcutoff(x::T, α::T, β::T, weighted::Bool=false) where {T<:AbstractFloat}
     if x == 0
         return 0
     end # Check if edge exist (val ≥ 0)
@@ -236,11 +236,11 @@ value.
 
 # Arguments
 - `M::AbtractMatrix`: Continuous feature matrix
-- `α::Float64`: Strong-ties cutoff
-- `β::Float64`: Weak-ties cutoff
+- `α::AbstractFloat`: Strong-ties cutoff
+- `β::AbstractFloat`: Weak-ties cutoff
 - `weighted::Bool`: Flag for feature weighting using real value
 """
-function featurize(M::NamedArray, α::Float64, β::Float64, weighted::Bool)
+function featurize(M::NamedArray, α::AbstractFloat, β::AbstractFloat, weighted::Bool)
     # Filter matrix
     Mf = copy(M)
     Mf.array = cutoff.(M.array, α, β, weighted)
@@ -257,11 +257,11 @@ features with it's real value.
 
 # Arguments
 - `M::AbtractMatrix`: Continuous feature matrix
-- `α::Float64`: Strong-ties cutoff
-- `β::Float64`: Weak-ties probability
+- `α::AbstractFloat`: Strong-ties cutoff
+- `β::AbstractFloat`: Weak-ties probability
 - `weighted::Bool`: Flag for feature weighting using real value
 """
-function pfeaturize(M::NamedArray, α::Float64, β::Float64, weighted::Bool)
+function pfeaturize(M::NamedArray, α::AbstractFloat, β::AbstractFloat, weighted::Bool)
     # Filter matrix
     Mf = copy(M)
     Mf.array = pcutoff.(M.array, α, β, weighted)
@@ -278,11 +278,11 @@ features with it's real value.
 
 # Arguments
 - `M::AbtractMatrix`: Continuous feature matrix
-- `α::Float64`: Strong-ties z-cutoff
-- `β::Float64`: Weak-ties z-cutoff
+- `α::AbstractFloat`: Strong-ties z-cutoff
+- `β::AbstractFloat`: Weak-ties z-cutoff
 - `weighted::Bool`: Flag for feature weighting using real value
 """
-function zfeaturize(M::NamedArray, zα::Float64, zβ::Float64, weighted::Bool)
+function zfeaturize(M::NamedArray, zα::AbstractFloat, zβ::AbstractFloat, weighted::Bool)
     # Convert z-cutoff to cutoff
     μ = mean(vec(M))
     σ = std(vec(M))
@@ -309,7 +309,7 @@ TODO: Add short description to `predict`
 """
 function predict(A::T, B::T, names::Tuple; GPU::Bool = false) where {T<:NamedMatrix}
     # GPU calculations helper functions
-    _useGPU(x::AbstractArray) = GPU ? CuArray(x) : x
+    _useGPU(x::AbstractArray) = GPU ? CuArray{Float32}(x) : x
 
     # Target prediction using NBI
     W = denovoNBI(B.array)
@@ -345,7 +345,7 @@ TODO: Add short description to `predict`
 """
 function predict(I::Tuple{T,T}, DT::NamedMatrix; GPU::Bool = false) where {T<:NamedMatrix}
     # GPU calculations helper functions
-    _useGPU(x::AbstractArray) = GPU ? CuArray(x) : x
+    _useGPU(x::AbstractArray) = GPU ? CuArray{Float32}(x) : x
 
     # Target prediction using NBI
     A, B = I
