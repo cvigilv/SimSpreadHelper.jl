@@ -26,6 +26,27 @@ function cutoff(x::T, α::T, β::T, weighted::Bool=false) where {T<:AbstractFloa
 end
 
 """
+    cutoff(x::AbstractMatrix{T}, α::T, β::T, weighted::Bool=false) where {T<:AbstractFloat}
+
+wl-SimSpread similarity cutoff function
+
+# Arguments
+- `M::T` : Matrix to apply criteria
+- `α::T` : Strong-ties threshold
+- `β::T` : Weak-ties threshold
+- `weighted::Bool` : Apply weighting function to outcome (default = False)
+"""
+function cutoff(M::AbstractMatrix{T}, α::T, β::T, weighted::Bool=false) where {T<:AbstractFloat}
+    M′ = similar(M)
+    for (ridx, rvec) in enumerate(eachrow(M))
+        isstronglylinked = any(rvec .≥ α)
+        M′[ridx, :] .= cutoff.(rvec, α, isstronglylinked ? β : 0.0, weighted)
+    end
+
+    return M′
+end
+
+"""
     pcutoff(x::T, α::T, β::T, weighted::Bool=false) where {T<:AbstractFloat}
 
 wl-SimSpread similarity probabilistic cutoff function
@@ -99,16 +120,16 @@ function prepare!(DT::T, DF::T, Cs::AbstractVector) where {T<:NamedMatrix}
     Mtt = zeros(Nt, Nt)
 
     A = Matrix(
-        [ Mcc Mcd Mcf Mct;
-          Mdc Mdd Mdf Mdt;
-          Mfc Mfd Mff Mft;
-          Mtc Mtd Mtf Mtt]
+        [Mcc Mcd Mcf Mct
+            Mdc Mdd Mdf Mdt
+            Mfc Mfd Mff Mft
+            Mtc Mtd Mtf Mtt]
     )
 
     namedA = NamedArray(A, (vcat(Cs, Ds, Fs, Ts), vcat(Cs, Ds, Fs, Ts)))
     namedB = deepcopy(namedA)
-    namedB[Cs,:] .= 0
-    namedB[:,Cs] .= 0
+    namedB[Cs, :] .= 0
+    namedB[:, Cs] .= 0
 
     return namedA, namedB
 end
@@ -168,16 +189,16 @@ function prepare(dts::T, dfs::T) where {T<:Tuple{NamedMatrix,NamedMatrix}}
     Mtt = zeros(Nt, Nt)
 
     A = Matrix(
-        [ Mcc Mcd Mcf Mct;
-          Mdc Mdd Mdf Mdt;
-          Mfc Mfd Mff Mft;
-          Mtc Mtd Mtf Mtt]
+        [Mcc Mcd Mcf Mct
+            Mdc Mdd Mdf Mdt
+            Mfc Mfd Mff Mft
+            Mtc Mtd Mtf Mtt]
     )
 
     namedA = NamedArray(A, (vcat(D₁, D₀, F₀, T₀), vcat(D₁, D₀, F₀, T₀)))
     namedB = deepcopy(namedA)
-    namedB[D₁,:] .= 0
-    namedB[:,D₁] .= 0
+    namedB[D₁, :] .= 0
+    namedB[:, D₁] .= 0
 
     return namedA, namedB
 end
@@ -196,13 +217,13 @@ Split drugs `D` into `k` groups, extract their edges and append to cross-validat
 - `rng::Int64`: Seed used for data splitting.
 
 """
-function Base.split(G::NamedArray, ngroups::Int64; seed::Int64 = 1)
+function Base.split(G::NamedArray, ngroups::Int64; seed::Int64=1)
     # Get array of drugs in adjacency matrix
-    D = names(G,1)
+    D = names(G, 1)
 
     # Assign fold to edges of graph
     shuffle!(MersenneTwister(seed), D)
-    groups = [ [] for _ in 1:ngroups ]
+    groups = [[] for _ in 1:ngroups]
 
     for (i, dᵢ) in enumerate(D)
         foldᵢ = mod(i, ngroups) + 1
@@ -307,7 +328,7 @@ TODO: Add short description to `predict`
 - `names::Tuple`: Rows & columns named indices
 - `GPU::Bool`: (default = false)
 """
-function predict(A::T, B::T, names::Tuple; GPU::Bool = false) where {T<:NamedMatrix}
+function predict(A::T, B::T, names::Tuple; GPU::Bool=false) where {T<:NamedMatrix}
     # GPU calculations helper functions
     _useGPU(x::AbstractArray) = GPU ? CuArray{Float32}(x) : x
 
@@ -315,11 +336,11 @@ function predict(A::T, B::T, names::Tuple; GPU::Bool = false) where {T<:NamedMat
     W = denovoNBI(B.array)
     F = begin
         F = copy(A)
-       
+
         Aarr = _useGPU(A.array)
         Warr = _useGPU(W)
         F.array = Aarr * Warr^2
-        
+
         # Free GPU memory
         if GPU
             CUDA.unsafe_free!(Aarr)
@@ -343,7 +364,7 @@ TODO: Add short description to `predict`
 - `DT::NamedMatrix`: Drug-target adjacency matrix
 - `GPU::Bool`: Use GPU acceleration for calculation (default = false)
 """
-function predict(I::Tuple{T,T}, DT::NamedMatrix; GPU::Bool = false) where {T<:NamedMatrix}
+function predict(I::Tuple{T,T}, DT::NamedMatrix; GPU::Bool=false) where {T<:NamedMatrix}
     # GPU calculations helper functions
     _useGPU(x::AbstractArray) = GPU ? CuArray{Float32}(x) : x
 
@@ -383,11 +404,11 @@ Flag errors from cross-validation splitting in place.
 function clean!(R::NamedArray, A::NamedArray, DT::NamedArray)
     # Clean predictions adjacancy matrix R from disconnected targets
     disconnected = 0
-    for (tᵢ, k) in zip(names(DT,2), k(A[names(DT,1), names(DT,2)]))
+    for (tᵢ, k) in zip(names(DT, 2), k(A[names(DT, 1), names(DT, 2)]))
         if k == 0
             disconnected += 1
-            R[:,tᵢ] .= -99
-            R[tᵢ,:] .= -99
+            R[:, tᵢ] .= -99
+            R[tᵢ, :] .= -99
         end
     end
     # @warn "$disconnected targets got disconnected, flagging predictions with '-99'"
