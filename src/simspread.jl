@@ -67,6 +67,27 @@ function pcutoff(x::T, α::T, β::T, weighted::Bool=false) where {T<:AbstractFlo
 end
 
 """
+    pcutoff(x::AbstractMatrix{T}, α::T, β::T, weighted::Bool=false) where {T<:AbstractFloat}
+
+wl-SimSpread similarity probabilistic cutoff function
+
+# Arguments
+- `M::T` : Matrix to apply criteria
+- `α::T` : Strong-ties threshold
+- `β::T` : Weak-ties probability
+- `weighted::Bool` : Apply weighting function to outcome (default = False)
+"""
+function pcutoff(M::AbstractMatrix{T}, α::T, β::T, weighted::Bool=false) where {T<:AbstractFloat}
+    M′ = similar(M)
+    for (ridx, rvec) in enumerate(eachrow(M))
+        isstronglylinked = any(rvec .≥ α)
+        M′[ridx, :] .= pcutoff.(rvec, α, isstronglylinked ? β : 0.0, weighted)
+    end
+
+    return M′
+end
+
+"""
     prepare!(DT::T, DF::T, Cs::AbstractVector) where {T<:NamedMatrix}
 
 Prepare compound-feature-drug-target network adjacency matrix for *de novo* NBI prediction.
