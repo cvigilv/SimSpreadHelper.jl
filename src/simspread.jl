@@ -290,7 +290,7 @@ function featurize(M::NamedArray, α::AbstractFloat, β::AbstractFloat, weighted
     return Mf
 end
 
-featurize(M::NamedArray, α::AbstractFloat, weighted::Bool) = featurize(M, α, 0, weighted)
+featurize(M::NamedArray, α::AbstractFloat, weighted::Bool) = featurize(M, α, 0.0, weighted)
 
 """
     pfeaturize(M::AbtractMatrix, α::Float64, β::Float64, weighted::Bool)
@@ -313,7 +313,7 @@ function pfeaturize(M::NamedArray, α::AbstractFloat, β::AbstractFloat, weighte
     return Mf
 end
 
-pfeaturize(M::NamedArray, α::AbstractFloat, weighted::Bool) = pfeaturize(M, α, 0, weighted)
+pfeaturize(M::NamedArray, α::AbstractFloat, weighted::Bool) = pfeaturize(M, α, 0.0, weighted)
 
 """
     zfeaturize(M::AbtractMatrix, α::Float64, β::Float64, weighted::Bool)
@@ -341,7 +341,7 @@ function zfeaturize(M::NamedArray, zα::AbstractFloat, zβ::AbstractFloat, weigh
     return Mf
 end
 
-zfeaturize(M::NamedArray, α::AbstractFloat, weighted::Bool) = zfeaturize(M, α, 0, weighted)
+zfeaturize(M::NamedArray, α::AbstractFloat, weighted::Bool) = zfeaturize(M, α, 0.0, weighted)
 
 
 """
