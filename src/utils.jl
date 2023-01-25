@@ -51,11 +51,6 @@ Load a matrix with named indices as a NamedArray.
 - `delimiter::Char` : Delimiter character between values in matrix (default = ' ')
 - `valuetype::Type` : Type of values contained in matrix (default = Float64)
 """
-function read_namedmatrix(filepath::String, delimiter::Char=' ', valuetype::Type=Float64)
-    M = readdlm(filepath, delimiter, String)
-    return _parse_matrix(M, true, true; type=valuetype)
-end
-
 function read_namedmatrix(filepath::String, delimiter::Char=' ', valuetype::Type=Float64; rows::Bool = true, cols::Bool = true)
     M = readdlm(filepath, delimiter, String)
     return _parse_matrix(M, rows, cols; type=valuetype)
