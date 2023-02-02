@@ -11,12 +11,18 @@ using StatsBase
 using Trapz
 
 import DelimitedFiles.writedlm
+
 include("graphs.jl")
+include("performance.jl")
 include("simspread.jl")
+include("utils.jl")
 
 export writedlm,
+    # General utilities
     read_namedmatrix,
     k,
+
+    # SimSpread
     cutoff,
     pcutoff,
     featurize,
@@ -27,5 +33,20 @@ export writedlm,
     predict,
     predict!,
     clean!,
-    save
+    save,
+
+    # Performance assessment
+    BEDROC,
+    AuPRC,
+    AuROC,
+    f1score,
+    mcc,
+    accuracy,
+    balancedaccuracy,
+    recall,
+    precision,
+    performanceatL,
+    meanperformance,
+    meanstdperformance,
+    maxperformance
 end
