@@ -465,7 +465,7 @@ function save(filepath::String, R::NamedMatrix, DT::NamedMatrix)
     # Save file
     open(filepath, "a+") do f
         for Cᵢ in Cnames, Tᵢ in Tnames
-            write(f, "$(findfirst(id -> id == Cᵢ, Cnames)), $Cᵢ, $Tᵢ, $(R[Cᵢ,Tᵢ]), $(DT[Cᵢ,Tᵢ])\n")
+            write(f, "$(findfirst(id -> id == Cᵢ, Cnames)); \"$Cᵢ\"; \"$Tᵢ\"; $(R[Cᵢ,Tᵢ]); $(DT[Cᵢ,Tᵢ])\n")
         end
     end
 end
@@ -491,7 +491,7 @@ Fold ID, Compound ID, Target ID, SimSpread Score, True-Positive state
 function save(filepath::String, fidx::Int64, C::AbstractVector, R::NamedMatrix, DT::NamedMatrix)
     open(filepath, "a+") do io
         for c in C, t in names(DT, 2)
-            write(io, "$fidx, $c, $t, $(R[c,t]), $(DT[c,t])\n")
+            write(io, "$fidx, \"$c\", \"$t\", $(R[c,t]), $(DT[c,t])\n")
         end
     end
 end
