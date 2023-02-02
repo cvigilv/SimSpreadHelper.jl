@@ -1,7 +1,3 @@
-using NamedArrays
-using DelimitedFiles
-import DelimitedFiles.writedlm
-
 """
     _namedmatrix2matrix(M::NamedMatrix)
 

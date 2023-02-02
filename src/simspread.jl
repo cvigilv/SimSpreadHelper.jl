@@ -1,10 +1,3 @@
-using Base
-using CUDA
-using Random
-using StatsBase
-using NamedArrays
-using NetworkBasedInference
-
 """
     cutoff(x::T, α::T, β::T, weighted::Bool=false) where {T<:AbstractFloat}
 

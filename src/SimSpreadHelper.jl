@@ -1,6 +1,16 @@
 module SimSpreadHelper
 
-include("utils.jl")
+using Base
+using CUDA
+using DelimitedFiles
+using MLBase
+using NamedArrays
+using NetworkBasedInference
+using Random
+using StatsBase
+using Trapz
+
+import DelimitedFiles.writedlm
 include("graphs.jl")
 include("simspread.jl")
 
