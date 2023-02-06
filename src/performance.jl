@@ -179,13 +179,11 @@ function performanceatL(
     @assert length(y) == length(yhat) "The number of scores must be equal to the number of labels"
 
     # Sort predictions by score
-    ytuples = collect(Vector, zip(y, yhat))
-    sort!(ytuples, by=x -> last(x), rev=true)
+    order = sortperm(yhat, rev=true)
 
     # Cuantify performance using top L predictions
-    ytuplesₗ = first(ytuples, L)
-    yₗ = first.(ytuplesₗ)
-    yhatₗ = ones(L)
+    yₗ = Int64.(first(y[order], L))
+    yhatₗ = Int64.(ones(L))
 
     return metric(roc(yₗ, yhatₗ))
 end
