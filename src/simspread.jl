@@ -1,42 +1,65 @@
 """
-    cutoff(x::T, α::T, β::T, weighted::Bool=false) where {T<:AbstractFloat}
+    cutoff(x::T, α::T, weighted::Bool=false) where {T<:AbstractFloat}
 
-wl-SimSpread similarity cutoff function
+Transform `x` based in SimSpread's similarity cutoff function.
 
 # Arguments
-- `x::T` : Value to apply criteria
-- `α::T` : Strong-ties threshold
-- `β::T` : Weak-ties threshold
-- `weighted::Bool` : Apply weighting function to outcome (default = False)
+- `x::T` : Value to transform
+- `α::T` : Similarity matrix
+- `weighted::Bool` : Apply weighting function to outcome (default = false)
 """
-function cutoff(x::T, α::T, β::T, weighted::Bool=false) where {T<:AbstractFloat}
-    @assert α ≥ β "β can't be greater than α!"
-    if x == 0
-        return 0
-    end    # Check if edge exist (val ≥ 0)
-    w = weighted ? x : 1        # Define weighting scheme
-    x ≥ α ? w : x < β ? w : 0 # Filter edge by cutoffs α & β
+function cutoff(x::T, α::T, weighted::Bool=false) where {T<:AbstractFloat}
+    x′ = deepcopy(x)
+    weight = weighted ? x′ : 1.0
+    x′ = x′ ≥ α ? weight : 0.0
+
+    return x′
 end
 
 """
-    cutoff(x::AbstractMatrix{T}, α::T, β::T, weighted::Bool=false) where {T<:AbstractFloat}
+    cutoff!(x::T, α::T, weighted::Bool=false) where {T<:AbstractFloat}
 
-wl-SimSpread similarity cutoff function
+Transform `x` based in SimSpread's similarity cutoff function, overwriting `x`.
 
 # Arguments
-- `M::T` : Matrix to apply criteria
-- `α::T` : Strong-ties threshold
-- `β::T` : Weak-ties threshold
-- `weighted::Bool` : Apply weighting function to outcome (default = False)
+- `x::T` : Value to transform
+- `α::T` : Similarity matrix
+- `weighted::Bool` : Apply weighting function to outcome (default = false)
 """
-function cutoff(M::AbstractMatrix{T}, α::T, β::T, weighted::Bool=false) where {T<:AbstractFloat}
-    M′ = similar(M)
-    for (ridx, rvec) in enumerate(eachrow(M))
-        isstronglylinked = any(rvec .≥ α)
-        M′[ridx, :] .= cutoff.(rvec, α, isstronglylinked ? β : 0.0, weighted)
-    end
+function cutoff!(x::T, α::T, weighted::Bool=false) where {T<:AbstractFloat}
+    weight = weighted ? x : 1.0
+    x = x ≥ α ? weight : 0.0
+end
+
+"""
+    cutoff(x::AbstractMatrix{T}, α::T, weighted::Bool=false) where {T<:AbstractFloat}
+
+Transform `M` based in SimSpread's similarity cutoff function.
+
+# Arguments
+- `M::T` : Matrix or Vector to transform
+- `α::T` : Similarity threshold
+- `weighted::Bool` : Apply weighting function to outcome (default = false)
+"""
+function cutoff(M::AbstractVecOrMat{T}, α::T, weighted::Bool=false) where {T<:AbstractFloat}
+    M′ = deepcopy(M)
+    M′ = cutoff.(M′, α, weighted)
 
     return M′
+end
+
+"""
+    cutoff!(M::AbstractVecOrMat{T}, α::T, weighted::Bool=false) where {T<:AbstractFloat}
+
+Transform `M` based in SimSpread's similarity cutoff function, overwriting `M`.
+
+# Arguments
+- `M::T` : Matrix or Vector to transform
+- `α::T` : Similarity threshold
+- `weighted::Bool` : Apply weighting function to outcome (default = false)
+"""
+function cutoff!(M::AbstractVecOrMat{T}, α::T, weighted::Bool=false) where {T<:AbstractFloat}
+    cutoff!.(M, α, weighted)
 end
 
 """
